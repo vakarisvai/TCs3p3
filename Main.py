@@ -6,10 +6,7 @@ class Deck:
     CARD_SUITS = ["Hearts", "Diamonds", "Clubs", "Spades"]
     def __init__(self):
         self._deck_of_cards = [f'{num} of {suit}' for num in self.CARD_NUMBERS for suit in self.CARD_SUITS]
-        # for num in self.card_numbers:
-        #     for suit in self.card_suits:
-        #         card = f'{num}{suit}'
-        #         self.deck_of_cards.append(card)
+
 
     def __str__(self):
         return str(self.deck_of_cards)
@@ -105,18 +102,22 @@ class Gameplay:
         bot_suit = self.get_suit(bot_card)
         user_num = self.get_num(user_card)
         user_suit = self.get_suit(user_card)
-        # cards = [bot_card, user_card]
 
-
+        print(f"Your cards: {self._user_cards}")
+        print("------------------------------------------------")
+        print(f"Bot cards: {self._bot_cards}")
+        print("------------------------------------------------")
         if card_values[bot_num] > card_values[user_num]:
             print(f"Bot won the battle with {bot_card} over {user_card}")
+            print("------------------------------------------------")
+            print("------------------------------------------------")
             winner = "BOT"
-            # return {"cards": cards, "winner": winner}
             return winner
         elif card_values[bot_num] < card_values[user_num]:
             print(f"You won the battle with {user_num} of {user_suit} over {bot_num} of {bot_suit}")
+            print("------------------------------------------------")
+            print("------------------------------------------------")
             winner = "USER"
-            # return {"cards": cards, "winner": winner}
             return winner
         
         return None
@@ -129,8 +130,6 @@ class Gameplay:
             self._user_cards.extend(cards)
 
 
-    
-
     def play_round(self, bot_cards: list, user_cards: str):
         try:
             bot_card, user_card = self.reveal_top_card()
@@ -138,13 +137,13 @@ class Gameplay:
             while True:
                 winner = self.check_for_battle_winner(bot_card = bot_card, user_card = user_card)
                 if winner == None:
+                    print(f"It is a tie with {bot_card} and {user_card}")
                     bot_facedown_card, user_facedown_card = self.reveal_top_card()
                     cards.append(bot_facedown_card)
                     cards.append(user_facedown_card)
                     bot_card, user_card = self.reveal_top_card()
                     cards.append(bot_card)
                     cards.append(user_card)
-                    # winner = self.check_for_battle_winner(bot_card = bot_card, user_card = user_card)
                 else:
                     self.add_cards(winner=winner, cards=cards)
                     return None
@@ -161,48 +160,34 @@ class Gameplay:
             return "USER"
 
 
-
-# Each reveals the top card
-# While true
-    # If there is a winner of the battle:
-        # Winner takes cards +++
-    # Else:
-        # War
-        # Winner takes cards +++
-    # Check if both players still have at least 1 card
-    # If not:
-        # Announce the winner of the game
-    # Break
 def main():
     deck = Deck()
     deck.shuffle_the_cards()
     cards = deck._deck_of_cards
     player_bot = Player(cards, "BOT")
     player_user = Player(cards, "VAKARIS")
+    print(f"You received: {player_user.player_cards}")
+    print("----")
+    print(f"Bot received: {player_bot.player_cards}")
+    print("----")
     gameplay = Gameplay(player_bot, player_user)
-    # print(f"gameplay {gameplay}")
     
     while True:
         winner = gameplay.play_round(bot_cards=player_bot._player_cards, user_cards=player_user._player_cards)
-        print(f"Your cards: {gameplay.user_cards}")
-        print("------------------------------------------------")
-        print(f"Your card TEST: {player_user.player_cards}")
-        print("------------------------------------------------")
-        print(f"BOT cards: {gameplay.bot_cards}")
-        print("------------------------------------------------")
-        print("------------------------------------------------")
+        # print(f"Your cards: {gameplay.user_cards}")
+        # print("------------------------------------------------")
+        # print(f"Your card TEST: {player_user.player_cards}")
+        # print("------------------------------------------------")
+        # print(f"BOT cards: {gameplay.bot_cards}")
+        # print("------------------------------------------------")
+        # print("------------------------------------------------")
         
-        # print(winner)
         if winner == None:
-            # print("atejo")
             pass
         else:
-            # gameplay.return_the_winner()
-            # print("YRA WINNERIS")
             break
         time.sleep(0.2)
 
-    print("BE ERRORU")
 
 if __name__ == "__main__":
     main()
