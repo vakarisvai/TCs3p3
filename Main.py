@@ -1,23 +1,20 @@
 import random
 
-
-
 class Deck:
+    CARD_NUMBERS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+    CARD_SUITS = ["Hearts", "Diamonds", "Clubs", "Spades"]
     def __init__(self):
-        self.card_numbers = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
-        self.card_suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
-        self.deck_of_cards = []
-        for num in self.card_numbers:
-            for suit in self.card_suits:
-                card = f'{num}{suit}'
-                self.deck_of_cards.append(card)
+        self.deck_of_cards = [f'{num}{suit}' for num in self.CARD_NUMBERS for suit in self.CARD_SUITS]
+        # for num in self.card_numbers:
+        #     for suit in self.card_suits:
+        #         card = f'{num}{suit}'
+        #         self.deck_of_cards.append(card)
 
     def __str__(self):
         return str(self.deck_of_cards)
 
     def shuffle_the_cards(self) -> list:
-        return random.shuffle(self.deck_of_cards)
-
+        random.shuffle(self.deck_of_cards)
 
 class Player:
     def __init__(self, deck: list, player_name = "USER"):
@@ -26,6 +23,10 @@ class Player:
 
     def __str__(self):
         return str(self._player_cards)
+    
+    @property
+    def player_cards(self):
+        return self._player_name
 
     def player_cards(self, deck) -> list:
         half = len(deck) // 2
@@ -38,9 +39,9 @@ class Player:
 # Shuffle the cards
 # Distribute the cards
 class Gameplay:
-    def __init___(self, bot_cards, user_cards):
-        self._bot_cards = bot_cards
-        self._user_cards = user_cards
+    def __init___(self, player_bot: Player, player_user: Player):
+        self._bot_cards = player_bot.player_cards
+        self._user_cards = player_user.player_cards
 
     def __srt__(self):
         ...
@@ -53,7 +54,6 @@ class Gameplay:
     @bot_cards.setter
     def bot_cards(self, new_bot_cards):
         self._bot_cards = new_bot_cards
-
 
     @property
     def user_cards(self):
@@ -126,7 +126,7 @@ class Gameplay:
         return False
     
 
-    def play_round(self):
+    def play_round(self, bot_cards: list, user_cards: str):
         bot_card, user_card = self.reveal_top_card()
         cards = [bot_card, user_card]
         while True:
