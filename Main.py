@@ -1,10 +1,11 @@
 import random
+import time
 
 class Deck:
     CARD_NUMBERS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
     CARD_SUITS = ["Hearts", "Diamonds", "Clubs", "Spades"]
     def __init__(self):
-        self.deck_of_cards = [f'{num}{suit}' for num in self.CARD_NUMBERS for suit in self.CARD_SUITS]
+        self._deck_of_cards = [f'{num} of {suit}' for num in self.CARD_NUMBERS for suit in self.CARD_SUITS]
         # for num in self.card_numbers:
         #     for suit in self.card_suits:
         #         card = f'{num}{suit}'
@@ -14,12 +15,12 @@ class Deck:
         return str(self.deck_of_cards)
 
     def shuffle_the_cards(self) -> list:
-        random.shuffle(self.deck_of_cards)
+        random.shuffle(self._deck_of_cards)
 
 class Player:
     def __init__(self, deck: list, player_name = "USER"):
         self._player_name = player_name
-        self._player_cards = self.player_cards(deck)
+        self.player_cards = deck
 
     def __str__(self):
         return str(self._player_cards)
@@ -27,25 +28,27 @@ class Player:
     @property
     def player_cards(self):
         return self._player_name
-
-    def player_cards(self, deck) -> list:
+    
+    @property
+    def player_cards(self):
+        return self._player_cards 
+    
+    @player_cards.setter
+    def player_cards(self, deck):
         half = len(deck) // 2
         if self._player_name == "BOT":
-            return deck[:half]
+            self._player_cards = deck[:half]
         else:
-            return deck[half:]
+            self._player_cards = deck[half:]
         
 
-# Shuffle the cards
-# Distribute the cards
 class Gameplay:
-    def __init___(self, player_bot: Player, player_user: Player):
+    def __init__(self, player_bot: Player, player_user: Player):
         self._bot_cards = player_bot.player_cards
         self._user_cards = player_user.player_cards
 
     def __srt__(self):
-        ...
-
+        return str(type(self._bot_cards))
 
     @property
     def bot_cards(self):
@@ -66,13 +69,22 @@ class Gameplay:
 
     def reveal_top_card(self):
         """
-        The function does not require any arguments. It returns the card that bot revealed, the card that user revealed and the list of revealed cards
+        The function does not require any arguments. It returns the card that bot revealed and the card that user revealed
         """
-        bot_card, user_card = self._bot_cards.pop(0), self._user_cards.pop(0)
+        bot_card = self._bot_cards.pop(0)
+        user_card = self._user_cards.pop(0)
         return bot_card, user_card
 
+
+    def get_num(self, card):
+        return card.split(" ")[0]
     
-    def check_for_battle_winner(self, bot_card, user_card) -> list:
+
+    def get_suit(self, card):
+        return card.split(" ")[2]
+
+    
+    def check_for_battle_winner(self, bot_card: str, user_card: str) -> list:
         card_values = {
             "2": 2,
             "3": 3, 
@@ -89,14 +101,15 @@ class Gameplay:
             "A": 14,
         }
 
-        bot_num = bot_card[0]
-        user_num = user_card[0]
-        bot_suit = bot_card[1:]
-        user_suit = user_card[1:]
+        bot_num = self.get_num(bot_card)
+        bot_suit = self.get_suit(bot_card)
+        user_num = self.get_num(user_card)
+        user_suit = self.get_suit(user_card)
         # cards = [bot_card, user_card]
 
+
         if card_values[bot_num] > card_values[user_num]:
-            print(f"Bot won the battle with {bot_num} of {bot_suit} over {user_num} of {user_suit}")
+            print(f"Bot won the battle with {bot_card} over {user_card}")
             winner = "BOT"
             # return {"cards": cards, "winner": winner}
             return winner
@@ -109,37 +122,44 @@ class Gameplay:
         return None
         
 
-    def add_cards(self, bot_cards: list, user_cards: list, winner: str, cards: list):
+    def add_cards(self, winner: str, cards: list):
         if winner == "BOT":
-            return bot_cards.extend(cards)
+            self._bot_cards.extend(cards)
         elif winner == "USER":
-            return user_cards.extend(cards)
+            self._user_cards.extend(cards)
 
 
-    def check_for_winner_of_the_game(self, user_cards: list, bot_cards: list) -> bool:
-        if len(self.user_cards) == 0:
-            print("Bot has won the game")
-            return True
-        elif len(self.bot_cards) == 0:
-            print("You have won the game")
-            return True
-        return False
     
 
     def play_round(self, bot_cards: list, user_cards: str):
-        bot_card, user_card = self.reveal_top_card()
-        cards = [bot_card, user_card]
-        while True:
-            winner = self.check_for_battle_winner(bot_card = bot_card, user_card = user_card)
-            if winner == None:
-                bot_facedown_card, user_facedown_card = self.reveal_top_card()
-                bot_card, user_card = self.reveal_top_card()
-                battle = self.check_for_battle_winner(bot_card = bot_card, user_card = user_card)
-            else:
-                self.add_cards(winner=battle["winner"], cards=cards, user_cards=, bot_cards=)
-                break
+        try:
+            bot_card, user_card = self.reveal_top_card()
+            cards = [bot_card, user_card]
+            while True:
+                winner = self.check_for_battle_winner(bot_card = bot_card, user_card = user_card)
+                if winner == None:
+                    bot_facedown_card, user_facedown_card = self.reveal_top_card()
+                    cards.append(bot_facedown_card)
+                    cards.append(user_facedown_card)
+                    bot_card, user_card = self.reveal_top_card()
+                    cards.append(bot_card)
+                    cards.append(user_card)
+                    # winner = self.check_for_battle_winner(bot_card = bot_card, user_card = user_card)
+                else:
+                    self.add_cards(winner=winner, cards=cards)
+                    return None
+        except IndexError:
+            self.return_the_winner(bot_cards=self._bot_cards, user_cards=self._user_cards)
 
          
+    def return_the_winner(self, user_cards: list, bot_cards: list) -> bool:
+        if len(self._user_cards) == 0:
+            print("Bot has won the game")
+            return "BOT"
+        else:
+            print("You have won the game")
+            return "USER"
+
 
 
 # Each reveals the top card
@@ -156,30 +176,33 @@ class Gameplay:
 def main():
     deck = Deck()
     deck.shuffle_the_cards()
-    cards = deck.deck_of_cards
+    cards = deck._deck_of_cards
     player_bot = Player(cards, "BOT")
-    player_me = Player(cards, "VAKARIS")
-    gameplay = Gameplay()
+    player_user = Player(cards, "VAKARIS")
+    gameplay = Gameplay(player_bot, player_user)
+    # print(f"gameplay {gameplay}")
+    
     while True:
-        gameplay.reveal_top_card
-        if gameplay.check_for_tie:
-            # WAR
-        # gameplay.check_for_battle_winner:
-            # gameplay.announce_battle_winner
-            # gameplay.take_cards
-            ...
-            skipped_cards = gameplay.skip_cards
-            gameplay.reveal_top_card
-            gameplay.check_for_war_winner
-            gameplay.take_cards     
-        else:
-            gameplay.check_for_battle_winner
-            gameplay.announce_battle_winner
+        winner = gameplay.play_round(bot_cards=player_bot._player_cards, user_cards=player_user._player_cards)
+        print(f"Your cards: {gameplay.user_cards}")
+        print("------------------------------------------------")
+        print(f"Your card TEST: {player_user.player_cards}")
+        print("------------------------------------------------")
+        print(f"BOT cards: {gameplay.bot_cards}")
+        print("------------------------------------------------")
+        print("------------------------------------------------")
         
-        if gameplay.check_for_game_winner:
-            gameplay.announce_the_winner
+        # print(winner)
+        if winner == None:
+            # print("atejo")
+            pass
+        else:
+            # gameplay.return_the_winner()
+            # print("YRA WINNERIS")
             break
+        time.sleep(0.2)
 
+    print("BE ERRORU")
 
 if __name__ == "__main__":
     main()
